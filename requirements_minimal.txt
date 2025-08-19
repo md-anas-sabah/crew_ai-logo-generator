@@ -1,0 +1,8 @@
+crewai
+langchain-openai
+python-decouple
+openai
+fal-client
+anthropic
+requests
+pydantic

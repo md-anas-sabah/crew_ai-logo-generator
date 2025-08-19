@@ -1,0 +1,9 @@
+crewai==0.1.32
+langchain-openai==0.1.7
+python-decouple==3.8
+openai==1.26.0
+fal-client==0.7.0
+anthropic==0.64.0
+requests==2.32.0
+pydantic==2.5.3
+litellm==1.35.32

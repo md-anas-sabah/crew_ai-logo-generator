@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{company_name}} - Logo Design Preview</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px 12px 0 0; }
+        .logo-showcase { padding: 40px; text-align: center; }
+        .logo-image { max-width: 300px; width: 100%; height: auto; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .details { padding: 30px; border-top: 1px solid #e0e0e0; }
+        .detail-section { margin-bottom: 25px; }
+        .detail-title { font-weight: 600; color: #333; margin-bottom: 8px; }
+        .brand-analysis { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{company_name}} Logo Design</h1>
+            <p>Professional Brand Identity • {{logo_style}} Style</p>
+        </div>
+        <div class="logo-showcase">
+            {{#logo_image}}<img src="{{logo_image}}" alt="{{company_name}} Logo" class="logo-image">{{/logo_image}}
+            {{^logo_image}}<div style="padding: 60px; background: #f0f0f0; border-radius: 8px; color: #666;">Logo Preview Unavailable</div>{{/logo_image}}
+        </div>
+        <div class="details">
+            <div class="detail-section">
+                <div class="detail-title">Company</div>
+                <div>{{company_name}}</div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-title">Logo Style</div>
+                <div>{{logo_style}}</div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-title">Generated</div>
+                <div>{{timestamp}}</div>
+            </div>
+            {{#brand_analysis}}
+            <div class="brand-analysis">
+                <div class="detail-title">Why This Logo Works</div>
+                <div>{{brand_analysis}}</div>
+            </div>
+            {{/brand_analysis}}
+        </div>
+    </div>
+</body>
+</html>
