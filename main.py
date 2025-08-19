@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from textwrap import dedent
 from agents import LogoDesignAgents
 from logo_tasks import LogoDesignTasks
+import json
 
 os.environ["OPENAI_API_KEY"] = config("OPENAI_API_KEY")
 if config("OPENAI_ORGANIZATION_ID", default=""):
@@ -224,68 +225,12 @@ class LogoGenerator:
             return None
 
     def run(self):
-        print(f"\n🎨 Creating professional logo for: '{self.company_name}'")
-        print(f"🏢 Company Description: {self.company_description}")
-        print(f"🎭 Logo Style: {self.logo_style}")
-        if self.preferred_color:
-            print(f"🎨 Preferred Color: {self.preferred_color}")
-        if self.brand_tone:
-            print(f"🎵 Brand Tone: {self.brand_tone}")
-        if self.industry_keywords:
-            print(f"🏭 Industry: {self.industry_keywords}")
-        print("=" * 60)
-
         # Initialize agents and tasks
         agents = LogoDesignAgents()
         tasks = LogoDesignTasks()
 
-        # Step 1: Generate 3 brand strategy concepts
-        print("\n🧠 STEP 1: Analyzing brand strategy and generating 3 logo concepts...")
-        brand_strategist = agents.brand_strategist_agent()
-        strategy_task = tasks.brand_strategy_task(
-            brand_strategist, 
-            self.company_name, 
-            self.company_description,
-            self.logo_style,
-            self.industry_keywords,
-            self.brand_tone,
-            self.preferred_color
-        )
-        
-        strategy_crew = Crew(
-            agents=[brand_strategist],
-            tasks=[strategy_task],
-            verbose=True,
-        )
-        
-        concepts_result = strategy_crew.kickoff()
-        print("\n" + "="*60)
-        print("🎨 HERE ARE YOUR 3 STRATEGIC LOGO CONCEPTS:")
-        print("="*60)
-        print(concepts_result)
-        
-        # Step 2: User selects a concept
-        print("\n" + "="*60)
-        while True:
-            try:
-                choice = input("\n👆 Which concept resonates with your brand vision? (Enter 1, 2, or 3): ").strip()
-                if choice in ["1", "2", "3"]:
-                    selected_concept = f"Concept {choice}"
-                    break
-                else:
-                    print("❌ Please enter 1, 2, or 3")
-            except KeyboardInterrupt:
-                print("\n👋 Goodbye!")
-                return
-        
-        print(f"\n✅ Excellent choice! Creating your professional logo based on {selected_concept}...")
-        
         # Create unique output folder for this logo
         logo_folder, timestamp = self.create_unique_output_folder()
-        print(f"\n📁 Created output folder: {os.path.basename(logo_folder)}")
-        
-        # Step 3: Generate the professional logo
-        print("\n🚀 STEP 2: Designing your world-class logo with dual-AI enhancement...")
         
         # Initialize logo design agents
         logo_designer = agents.logo_designer_agent(logo_folder)
@@ -294,10 +239,10 @@ class LogoGenerator:
         # Create brand context for logo generation
         brand_context = f"Company: {self.company_name}, Industry: {self.industry_keywords}, Tone: {self.brand_tone}, Color: {self.preferred_color}"
         
-        # Create logo design task
+        # Create logo design task (skip concept selection, use direct approach)
         logo_task = tasks.logo_design_task(
             logo_designer,
-            selected_concept,
+            "Direct Professional Logo Design",
             self.company_name,
             self.company_description,
             self.logo_style,
@@ -308,105 +253,53 @@ class LogoGenerator:
         design_crew = Crew(
             agents=[logo_designer],
             tasks=[logo_task],
-            verbose=True,
+            verbose=False,
         )
         
         logo_result = design_crew.kickoff()
         
-        # Parse logo results
-        logo_data = {}
+        # Parse logo results and extract PNG URL
+        image_url = None
+        reason = None
         
         try:
             # Extract logo data from the result
             logo_result_str = str(logo_result)
             
-            # Try to parse logo URLs and data from the result
-            if "image.png" in logo_result_str:
-                # Extract PNG and SVG URLs
-                import re
-                png_match = re.search(r'https://[^\s\)]+image\.png', logo_result_str)
-                svg_match = re.search(r'https://[^\s\)]+image\.png', logo_result_str)  # Both might be PNG URLs from FAL
+            # Try to parse logo URLs from the result
+            import re
+            url_match = re.search(r'https://[^\s\)\"]+\.png', logo_result_str)
+            
+            if url_match:
+                image_url = url_match.group()
+            
+            # Generate brand analysis for the reason
+            if image_url:
+                brand_task = tasks.brand_analysis_task(
+                    brand_analyst,
+                    logo_result_str,
+                    f"Company: {self.company_name}, Description: {self.company_description}, Style: {self.logo_style}"
+                )
                 
-                logo_data = {
-                    "png_url": png_match.group() if png_match else None,
-                    "svg_url": svg_match.group() if svg_match else None,
-                    "status": "success",
-                    "description": logo_result_str
-                }
-            else:
-                # Fallback - store the full result
-                logo_data = {
-                    "status": "completed",
-                    "description": logo_result_str,
-                    "raw_output": logo_result_str
-                }
+                analysis_crew = Crew(
+                    agents=[brand_analyst],
+                    tasks=[brand_task],
+                    verbose=False,
+                )
+                
+                analysis_result = analysis_crew.kickoff()
+                reason = str(analysis_result)[:500]  # Keep it concise
                 
         except Exception as e:
-            logo_data = {
-                "status": "error", 
-                "error": f"Error processing logo results: {str(e)}",
-                "raw_output": str(logo_result)
-            }
+            reason = f"Error generating logo analysis: {str(e)}"
         
-        # Create comprehensive result structure
-        complete_result = {
-            "timestamp": datetime.now().isoformat(),
-            "company_name": self.company_name,
-            "company_description": self.company_description,
-            "logo_style": self.logo_style,
-            "selected_concept": selected_concept,
-            "brand_context": brand_context,
-            "logo": logo_data,
-            "status": "completed"
+        # Return pure JSON response
+        result = {
+            "image_url": image_url or "Error generating logo",
+            "reason": reason or "Professional logo design created for optimal brand recognition and market positioning"
         }
         
-        # Save all outputs to the unique folder
-        json_filepath = self.save_json_output(complete_result, logo_folder, timestamp)
-        markdown_filepath = self.save_markdown_output(complete_result, logo_folder, timestamp)
-        html_filepath = self.generate_html_preview(complete_result, logo_folder, timestamp)
-        
-        # Format and display final output
-        print("\n" + "="*60)
-        print(f"🎉 YOUR PROFESSIONAL LOGO FOR {self.company_name.upper()} IS READY!")
-        print("="*60)
-        
-        print(f"\n🎨 LOGO DETAILS:")
-        print("-" * 30)
-        print(f"📋 Company: {complete_result['company_name']}")
-        print(f"🎭 Style: {complete_result['logo_style']}")
-        print(f"🎯 Concept: {complete_result['selected_concept']}")
-        
-        print(f"\n📁 LOGO FILES:")
-        print("-" * 30)
-        logo_info = complete_result["logo"]
-        if logo_info.get("status") == "success" or logo_info.get("png_url"):
-            if logo_info.get("png_url"):
-                print(f"🖼️  PNG Logo: {logo_info['png_url']}")
-            if logo_info.get("svg_url"):
-                print(f"📐 SVG Logo: {logo_info['svg_url']}")
-            if logo_info.get("description"):
-                print(f"📝 Description: {logo_info['description'][:200]}...")
-        else:
-            print("📄 Logo Generation Completed:")
-            print(f"   Status: {logo_info.get('status', 'Unknown')}")
-            if logo_info.get('error'):
-                print(f"   ❌ Error: {logo_info['error']}")
-            if logo_info.get('description'):
-                print(f"   📝 Details: {logo_info['description'][:300]}...")
-        
-        print(f"\n📂 SAVED FILES:")
-        print("-" * 30)
-        print(f"💾 JSON Data: {json_filepath}")
-        print(f"📝 Brand Report: {markdown_filepath}")
-        if html_filepath:
-            print(f"🌐 Preview Page: {html_filepath}")
-        
-        print(f"\n📂 Complete folder path: {logo_folder}")
-        print("\n" + "="*60)
-        print("✨ Professional logo design complete! Check the HTML preview for full brand presentation!")
-        print("="*60)
-        
-        return complete_result
+        return result
 
 
 class ContentCalendarPlanner:
@@ -627,87 +520,45 @@ class ContentCalendarPlanner:
 
 
 if __name__ == "__main__":
-    print("🎨 Welcome to Professional Logo Generator AI!")
-    print("=" * 60)
-    print("💡 World-Class Logo Design Features:")
-    print("   • Advanced Brand Psychology Analysis")
-    print("   • 3 Strategic Logo Concepts to Choose From")
-    print("   • Dual-AI Enhancement (GPT-4 + Claude Sonnet 3.5)")
-    print("   • Professional PNG & SVG Output Formats")
-    print("   • Comprehensive Brand Analysis Report")
-    print("   • Fortune 500 Quality Standards")
-    print("")
-    print("🎨 SUPPORTED LOGO STYLES:")
-    print("   1. WordMark - Typography-based company name design")
-    print("   2. LetterMark - Elegant monogram/initial design")
-    print("   3. Pictorial Mark - Iconic symbol representation")
-    print("   4. Abstract - Unique geometric/organic forms")
-    print("   5. Combination Mark - Text + symbol integration")
-    print("   6. Emblem - Classic badge/crest style")
-    print("")
-    print("🚀 PROFESSIONAL OUTPUT:")
-    print("   • High-resolution PNG (1024x1024px) for digital use")
-    print("   • Scalable SVG vector format for print/large displays")
-    print("   • Brand psychology analysis explaining logo effectiveness")
-    print("   • Professional HTML preview for client presentation")
-    print("   • Complete brand implementation guidelines")
-    print("=" * 60)
+    print("🎨 Professional Logo Generator")
+    print("=" * 40)
     
     try:
         # Collect company information
-        print("\n🏢 Let's create your professional logo! Please provide the following information:")
-        print("-" * 60)
-        
-        company_name = input("\n🏭 Company Name (Required): ").strip()
+        company_name = input("Company Name: ").strip()
         if not company_name:
-            print("❌ Company name is required!")
+            print("Company name is required!")
             exit()
         
-        company_description = input("\n📋 Company Description (Required)\n   Describe what your company does, your mission, or key services:\n   ").strip()
+        company_description = input("Company Description: ").strip()
         if not company_description:
-            print("❌ Company description is required!")
+            print("Company description is required!")
             exit()
         
-        # Logo style selection (required)
-        print("\n🎨 Select Your Logo Style (Required):")
-        print("   1. WordMark - Focus on typography and company name styling")
-        print("   2. LetterMark - Monogram or initials-based design")
-        print("   3. Pictorial Mark - Icon or symbol representing your business")
-        print("   4. Abstract - Modern geometric or artistic forms")
-        print("   5. Combination Mark - Company name with complementary symbol")
-        print("   6. Emblem - Traditional badge or crest design")
+        # Logo style selection
+        print("\nLogo Styles:")
+        print("1. WordMark  2. LetterMark  3. Pictorial Mark")
+        print("4. Abstract  5. Combination Mark  6. Emblem")
         
         while True:
             try:
-                style_choice = input("\n👆 Choose your logo style (1-6): ").strip()
+                style_choice = input("Choose style (1-6): ").strip()
                 style_map = {
-                    "1": "WordMark",
-                    "2": "LetterMark", 
-                    "3": "Pictorial Mark",
-                    "4": "Abstract",
-                    "5": "Combination Mark",
-                    "6": "Emblem"
+                    "1": "WordMark", "2": "LetterMark", "3": "Pictorial Mark",
+                    "4": "Abstract", "5": "Combination Mark", "6": "Emblem"
                 }
                 if style_choice in style_map:
                     logo_style = style_map[style_choice]
                     break
                 else:
-                    print("❌ Please enter a number from 1-6")
+                    print("Please enter 1-6")
             except KeyboardInterrupt:
-                print("\n👋 Goodbye!")
                 exit()
         
         # Optional information
-        print(f"\n✅ Selected: {logo_style}")
-        print("\n🌈 Optional Information (press Enter to skip):")
-        
-        preferred_color = input("\n🎨 Preferred Color/Palette (e.g., 'Blue', 'Red and Gold', 'Green tones'): ").strip()
-        
-        brand_tone = input("\n🎵 Brand Tone (e.g., 'Professional', 'Friendly', 'Modern', 'Traditional', 'Playful'): ").strip()
-        
-        industry_keywords = input("\n🏭 Industry Keywords (e.g., 'Technology', 'Healthcare', 'Fashion', 'Food & Beverage'): ").strip()
-        
-        print(f"\n🚀 Creating your {logo_style} logo for {company_name}...")
+        preferred_color = input("Preferred Color (optional): ").strip()
+        brand_tone = input("Brand Tone (optional): ").strip()
+        industry_keywords = input("Industry (optional): ").strip()
         
         generator = LogoGenerator(
             company_name=company_name,
@@ -720,13 +571,11 @@ if __name__ == "__main__":
         
         result = generator.run()
         
-        print("\n" + "="*60)
-        print("🎉 Logo generation completed successfully!")
-        print("📊 Your professional brand identity is ready for business use!")
-        print("="*60)
+        # Output pure JSON
+        import json
+        print(json.dumps(result))
         
     except KeyboardInterrupt:
-        print("\n\n👋 Goodbye! Come back anytime to create your professional logo!")
+        print("\nExiting...")
     except Exception as e:
-        print(f"\n❌ An error occurred: {str(e)}")
-        print("💡 Make sure you have set your API keys (OPENAI_API_KEY, FAL_KEY, CLAUDE_API_KEY) in the .env file!")
+        print(json.dumps({"image_url": "Error", "reason": f"Error: {str(e)}"}))

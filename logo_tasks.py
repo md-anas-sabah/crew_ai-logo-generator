@@ -20,41 +20,66 @@ class LogoDesignTasks:
             - Brand Tone: "{brand_tone}"
             - Preferred Color: "{preferred_color}"
             
-            Generate exactly 3 strategic logo concept directions that leverage different psychological approaches:
+            Generate 3 WORLD-CLASS strategic logo concepts using Fortune 500 brand psychology principles:
             
-            IMPORTANT: All concepts must use the selected logo style "{logo_style}" - do not recommend different styles.
+            CRITICAL: All concepts must optimize the "{logo_style}" style for maximum business impact.
             
-            Each concept should include:
-            - Brand positioning strategy and market differentiation approach
-            - Target audience psychological triggers and emotional appeal
-            - How the {logo_style} style will be optimized for this concept
-            - Color psychology reasoning and palette recommendations
-            - Typography psychology and font personality alignment (for text elements)
-            - Competitive differentiation strategy
-            - Long-term brand building potential
+            Each concept must include:
+            🎯 STRATEGIC BRAND POSITIONING:
+            - Market psychology analysis and competitive warfare strategy
+            - Target audience neuroscience triggers and emotional hijacking
+            - Cultural symbolism optimization for global market domination
+            - Brand personality alignment with customer aspirations
+            
+            🧠 PSYCHOLOGICAL ENGINEERING:
+            - Subconscious messaging through visual hierarchy and composition
+            - Color psychology with cultural sensitivity and accessibility compliance
+            - Typography psychology creating trust/innovation/luxury perceptions
+            - Subliminal brand messaging through strategic design choices
+            
+            💎 {logo_style.upper()} OPTIMIZATION MASTERY:
+            - Mathematical precision using golden ratio and fibonacci principles
+            - Scalability engineering ensuring impact from favicon to billboard
+            - Industry-specific symbolism creating instant market recognition
+            - Technical excellence meeting Fortune 500 reproduction standards
+            
+            🏆 COMPETITIVE DIFFERENTIATION:
+            - Visual supremacy analysis against top 3 industry competitors
+            - Proprietary brand language development for market ownership
+            - Trademark viability and legal uniqueness verification
+            - Long-term brand equity potential and cultural icon status
+            
+            📈 BUSINESS IMPACT METRICS:
+            - Brand recognition enhancement projections
+            - Market positioning advancement strategy
+            - Customer conversion psychology optimization
+            - Global expansion readiness assessment
             
             Format your response as:
             
-            **Concept 1: [Strategic Theme]**
-            Logo Style: {logo_style} - [How this style supports the strategic theme]
-            Brand Psychology: [Psychological positioning and emotional triggers]
-            Color Strategy: [Color psychology and palette recommendations]
-            Target Impact: [Expected market impact and audience response]
-            Differentiation: [How this approach stands out from competitors]
+            **🏆 CONCEPT 1: [Strategic Theme - e.g., "Market Dominance Through Premium Authority"]**
+            {logo_style} Optimization: [Mathematical precision and scalability engineering approach]
+            Psychological Warfare: [Target audience neuroscience triggers and emotional hijacking]
+            Color Psychology: [Pantone-level specifications with cultural sensitivity analysis]
+            Competitive Supremacy: [Visual differentiation strategy against top 3 industry competitors]
+            Business Impact: [Brand recognition enhancement and conversion optimization projections]
+            Global Readiness: [Cross-cultural appeal and international market expansion potential]
             
-            **Concept 2: [Strategic Theme]**
-            Logo Style: {logo_style} - [How this style supports the strategic theme]
-            Brand Psychology: [Psychological positioning and emotional triggers]
-            Color Strategy: [Color psychology and palette recommendations]
-            Target Impact: [Expected market impact and audience response]
-            Differentiation: [How this approach stands out from competitors]
+            **🚀 CONCEPT 2: [Strategic Theme - e.g., "Innovation Leadership Through Visual Breakthrough"]**
+            {logo_style} Mastery: [Golden ratio principles and technical excellence specifications]
+            Brand Psychology: [Subliminal messaging and customer aspiration alignment]
+            Cultural Symbolism: [Industry-specific iconography with universal comprehension]
+            Market Positioning: [Premium brand equity development and long-term value creation]
+            Differentiation Matrix: [Proprietary visual language and trademark viability]
+            ROI Potential: [Brand value enhancement and market share expansion projections]
             
-            **Concept 3: [Strategic Theme]**
-            Logo Style: {logo_style} - [How this style supports the strategic theme]
-            Brand Psychology: [Psychological positioning and emotional triggers]
-            Color Strategy: [Color psychology and palette recommendations]
-            Target Impact: [Expected market impact and audience response]
-            Differentiation: [How this approach stands out from competitors]
+            **💎 CONCEPT 3: [Strategic Theme - e.g., "Cultural Icon Status Through Timeless Excellence"]**
+            {logo_style} Excellence: [Fortune 500 reproduction standards and scalability mastery]
+            Neuroscience Triggers: [Subconscious brand messaging and emotional connection optimization]
+            Color Mastery: [Advanced color theory with accessibility compliance and global appeal]
+            Competitive Analysis: [Visual supremacy strategy and market ownership potential]
+            Legacy Building: [50-year brand longevity and cultural icon development pathway]
+            Global Domination: [International market psychology and cross-cultural effectiveness]
             
             {self.__tip_section()}
             
@@ -131,14 +156,22 @@ class LogoDesignTasks:
             - Differentiate from competitors while honoring industry conventions
             - Support long-term brand building and recognition goals
             
-            LOGO GENERATION PROCESS:
-            1. Use the generate_logo tool with these exact parameters:
-               - prompt: "Professional [logo_style] logo for [company_name], [detailed design description]"
+            🚀 PROFESSIONAL LOGO GENERATION PROTOCOL:
+            
+            PHASE 1 - STRATEGIC DESIGN ENGINEERING:
+            1. Analyze company requirements for mathematical composition opportunities
+            2. Engineer professional prompt using Fortune 500 design principles
+            3. Integrate golden ratio, color psychology, and cultural symbolism
+            4. Optimize for Ideogram V2A's professional rendering capabilities
+            
+            PHASE 2 - SINGLE LOGO CREATION:
+            Execute generate_svg_logo tool ONCE with COMPREHENSIVE parameters:
+               - prompt: "Professional {logo_style} logo design for {company_name} in English text only, real logo not illustration, mathematical precision, golden ratio composition, Fortune 500 quality standards, trademark-ready uniqueness, scalability engineering, competitive differentiation, company name in English only"
                - logo_style: "{logo_style}"
                - company_name: "{company_name}"
-            2. Use the generate_svg_logo tool with the same parameter format for vector version
-            3. Ensure both formats maintain design integrity and professional quality
-            4. Create detailed, professional logo design descriptions
+            
+            PHASE 3 - QUALITY VERIFICATION:
+            Verify logo meets professional standards and contains only English company name text
             
             PROFESSIONAL PROMPT STRUCTURE:
             Create logo prompts that include:
@@ -149,10 +182,20 @@ class LogoDesignTasks:
             - Scalability and application requirements
             - Premium quality specifications for business use
             
+            🚨 CRITICAL LOGO TEXT REQUIREMENTS:
+            • ONLY include the exact company name "{company_name}" in ENGLISH - NO other text
+            • Perfect spelling verification - company name must be 100% accurate
+            • Font selection based on company personality and industry psychology
+            • NO descriptions, taglines, explanations, or marketing copy in any language
+            • Typography that enhances brand recognition and memorability
+            • Clean, professional presentation suitable for all applications
+            • Company name text MUST be in English language only
+            • Design must be an actual LOGO, not an illustration or artwork
+            
             EXAMPLE TOOL USAGE:
-            Action: generate_logo
+            Action: generate_svg_logo
             Action Input: {{
-              "prompt": "Professional emblem logo for Marqait, featuring classic badge design with purple color scheme, AI marketing automation company, modern professional aesthetic, Fortune 500 quality",
+              "prompt": "Professional emblem logo featuring the company name 'Marqait' in English text only, perfect typography, classic badge design with purple color scheme, Fortune 500 quality, mathematical precision composition, brand-appropriate font psychology, real logo not illustration",
               "logo_style": "Emblem", 
               "company_name": "Marqait"
             }}
