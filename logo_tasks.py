@@ -169,14 +169,24 @@ class LogoDesignTasks:
             Execute BOTH logo generation tools to leverage dual-AI enhancement:
             
             PRIMARY MODEL - Execute generate_svg_logo tool with COMPREHENSIVE parameters:
-               - prompt: "Professional {logo_style} logo design for {company_name} in English text only, real logo not illustration, mathematical precision, golden ratio composition, Fortune 500 quality standards, trademark-ready uniqueness, scalability engineering, competitive differentiation, transparent background, no grid lines, no background elements, clean standalone logo, company name in English only"
-               - logo_style: "{logo_style}"
-               - company_name: "{company_name}"
+               Use this JSON structure: {{
+                 "prompt": "Professional {logo_style} logo design for {company_name} in English text only, real logo not illustration, mathematical precision, golden ratio composition, Fortune 500 quality standards, trademark-ready uniqueness, scalability engineering, competitive differentiation, transparent background, no grid lines, no background elements, clean standalone logo, company name in English only",
+                 "logo_style": "{logo_style}",
+                 "company_name": "{company_name}",
+                 "industry": "{brand_context}",
+                 "preferred_color": "extracted from brand context",
+                 "brand_tone": "extracted from brand context"
+               }}
             
             SECONDARY MODEL - Execute generate_qwen_logo tool for alternative approach:
-               - prompt: "Professional {logo_style} logo design for {company_name} in English text only, real logo not illustration, mathematical precision, golden ratio composition, Fortune 500 quality standards, trademark-ready uniqueness, scalability engineering, competitive differentiation, transparent background, no grid lines, no background elements, clean standalone logo, company name in English only"
-               - logo_style: "{logo_style}"
-               - company_name: "{company_name}"
+               Use this JSON structure: {{
+                 "prompt": "Professional {logo_style} logo design for {company_name} in English text only, real logo not illustration, mathematical precision, golden ratio composition, Fortune 500 quality standards, trademark-ready uniqueness, scalability engineering, competitive differentiation, transparent background, no grid lines, no background elements, clean standalone logo, company name in English only",
+                 "logo_style": "{logo_style}",
+                 "company_name": "{company_name}",
+                 "industry": "{brand_context}",
+                 "preferred_color": "extracted from brand context", 
+                 "brand_tone": "extracted from brand context"
+               }}
             
             PHASE 3 - QUALITY VERIFICATION & SELECTION:
             1. Verify both logos meet professional standards with transparent backgrounds

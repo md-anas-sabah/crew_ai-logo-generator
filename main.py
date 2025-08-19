@@ -237,8 +237,16 @@ class LogoGenerator:
         logo_designer = agents.logo_designer_agent(logo_folder, self.show_grid_lines)
         brand_analyst = agents.brand_analyst_agent()
         
-        # Create brand context for logo generation
-        brand_context = f"Company: {self.company_name}, Industry: {self.industry_keywords}, Tone: {self.brand_tone}, Color: {self.preferred_color}"
+        # Create structured brand context for logo generation with all parameters
+        import json
+        brand_context = json.dumps({
+            "company_name": self.company_name,
+            "industry": self.industry_keywords,
+            "brand_tone": self.brand_tone,
+            "preferred_color": self.preferred_color,
+            "company_description": self.company_description,
+            "logo_style": self.logo_style
+        })
         
         # Create logo design task (skip concept selection, use direct approach)
         logo_task = tasks.logo_design_task(
@@ -259,29 +267,51 @@ class LogoGenerator:
         
         logo_result = design_crew.kickoff()
         
-        # Parse dual AI logo results and extract best PNG URL with transparent background
+        # Parse dual AI logo results and extract both PNG and SVG URLs with transparent background
         image_url = None
+        svg_url = None
         reason = None
         
         try:
             # Extract logo data from the dual AI result
             logo_result_str = str(logo_result)
             
-            # Try to parse logo URLs from both AI models
+            # Try to parse both PNG and SVG URLs from both AI models
             import re
-            url_matches = re.findall(r'https://[^\s\)\"]+\.png', logo_result_str)
+            import json
             
-            # Select the best logo URL (prioritize the one with better quality indicators)
-            if url_matches:
-                # For now, use the first valid URL (can be enhanced with quality selection logic)
-                image_url = url_matches[0]
-                
-                # Log both generated logos for reference
-                if len(url_matches) > 1:
-                    print(f"Dual AI generation complete: Primary model URL: {url_matches[0]}")
-                    if len(url_matches) > 1:
-                        print(f"Secondary model URL: {url_matches[1]}")
-                    print("Selected primary model result for optimal quality and transparent background")
+            # Extract JSON data from the logo result
+            json_matches = re.findall(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', logo_result_str)
+            
+            # Parse the JSON responses to get both PNG and SVG info
+            for json_match in json_matches:
+                try:
+                    data = json.loads(json_match)
+                    if 'image_url' in data and data['image_url'].endswith('.png'):
+                        image_url = data['image_url']
+                    if 'svg_local_path' in data and not svg_url:
+                        # For SVG, we'll use the local path converted to URL format
+                        # This will need to be served by a web server in production
+                        svg_local_path = data['svg_local_path']
+                        # Extract just the filename for URL construction
+                        svg_filename = os.path.basename(svg_local_path)
+                        # Convert to relative URL (assuming the output folder is web-accessible)
+                        svg_url = f"./output/{os.path.basename(os.path.dirname(svg_local_path))}/{svg_filename}"
+                except (json.JSONDecodeError, KeyError):
+                    continue
+            
+            # Fallback: try to parse PNG URLs directly from text
+            if not image_url:
+                url_matches = re.findall(r'https://[^\s\)\"]+\.png', logo_result_str)
+                if url_matches:
+                    image_url = url_matches[0]
+            
+            # Log both generated logos for reference
+            if image_url:
+                print(f"Dual AI generation complete: PNG URL: {image_url}")
+                if svg_url:
+                    print(f"SVG URL: {svg_url}")
+                print("Selected primary model result for optimal quality and transparent background")
             
             # Generate brand analysis for the reason
             if image_url:
@@ -303,9 +333,10 @@ class LogoGenerator:
         except Exception as e:
             reason = f"Error generating dual AI logo analysis: {str(e)}"
         
-        # Return pure JSON response with transparent background logo
+        # Return pure JSON response with both PNG and SVG URLs (transparent background)
         result = {
             "image_url": image_url or "Error generating dual AI logo",
+            "svg_url": svg_url or None,
             "reason": reason or "Professional logo design created with transparent background using dual AI models (Flux Pro + Qwen) for optimal brand recognition, clean standalone presentation, and market positioning excellence"
         }
         

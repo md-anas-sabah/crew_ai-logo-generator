@@ -47,10 +47,26 @@ class LogoGeneratorTool(BaseTool):
         self.claude_service = ClaudeRefinementService()
         self.show_grid_lines = show_grid_lines
 
-    def _run(self, prompt: str, logo_style: str = None, company_name: str = None) -> str:
+    def _run(self, prompt: str, logo_style: str = None, company_name: str = None, industry: str = "", preferred_color: str = "", brand_tone: str = "") -> str:
         try:
-            # Handle case where CrewAI passes everything as a JSON string in prompt
+            # Extract parameters from structured brand context or prompt
             import json
+            import re
+            
+            # First try to extract from brand context in the prompt
+            brand_context_match = re.search(r'Brand Context: (.+?)(?:\n|$)', prompt)
+            if brand_context_match:
+                try:
+                    context_data = json.loads(brand_context_match.group(1))
+                    company_name = context_data.get('company_name', company_name)
+                    logo_style = context_data.get('logo_style', logo_style)
+                    industry = context_data.get('industry', industry)
+                    preferred_color = context_data.get('preferred_color', preferred_color)
+                    brand_tone = context_data.get('brand_tone', brand_tone)
+                except (json.JSONDecodeError, AttributeError):
+                    pass
+            
+            # Fallback: handle case where CrewAI passes everything as a JSON string in prompt
             if logo_style is None or company_name is None:
                 try:
                     # Try to parse prompt as JSON
@@ -59,18 +75,25 @@ class LogoGeneratorTool(BaseTool):
                         prompt = data.get('prompt', prompt)
                         logo_style = data.get('logo_style', logo_style)
                         company_name = data.get('company_name', company_name)
+                        industry = data.get('industry', industry)
+                        preferred_color = data.get('preferred_color', preferred_color)
+                        brand_tone = data.get('brand_tone', brand_tone)
                 except (json.JSONDecodeError, TypeError):
                     # If not JSON, try to extract from prompt string
                     if 'Marqait' in prompt and logo_style is None:
                         company_name = 'Marqait'
                         logo_style = 'Emblem'  # Default based on user selection
             
-            # Create logo-specific context for Claude refinement
-            logo_context = f"Logo style: {logo_style}, Company: {company_name}, Professional brand identity"
+            # Create comprehensive logo-specific context for Claude refinement
+            logo_context = f"Logo style: {logo_style}, Company: {company_name}, Industry: {industry}, Brand tone: {brand_tone}, Color: {preferred_color}, Professional brand identity"
             
-            # Refine the prompt using Claude specifically for logo design
+            # Refine the prompt using Claude with all advanced parameters
             print(f"Original logo prompt: {prompt}")
-            refined_prompt = self.claude_service.refine_logo_prompt(prompt, logo_context, logo_style)
+            refined_prompt = self.claude_service.refine_logo_prompt(
+                prompt, logo_context, logo_style, format="PNG",
+                company_name=company_name, industry=industry, 
+                preferred_color=preferred_color, brand_tone=brand_tone
+            )
             print(f"Claude-refined logo prompt: {refined_prompt}")
             
             # Ensure FAL_KEY is set in environment
@@ -167,7 +190,7 @@ class SVGLogoGeneratorTool(BaseTool):
         self.claude_service = ClaudeRefinementService()
         self.show_grid_lines = show_grid_lines
 
-    def _run(self, prompt: str, logo_style: str = None, company_name: str = None) -> str:
+    def _run(self, prompt: str, logo_style: str = None, company_name: str = None, industry: str = "", preferred_color: str = "", brand_tone: str = "") -> str:
         try:
             # Handle case where CrewAI passes everything as a JSON string in prompt
             import json
@@ -179,18 +202,25 @@ class SVGLogoGeneratorTool(BaseTool):
                         prompt = data.get('prompt', prompt)
                         logo_style = data.get('logo_style', logo_style)
                         company_name = data.get('company_name', company_name)
+                        industry = data.get('industry', industry)
+                        preferred_color = data.get('preferred_color', preferred_color)
+                        brand_tone = data.get('brand_tone', brand_tone)
                 except (json.JSONDecodeError, TypeError):
                     # If not JSON, try to extract from prompt string
                     if 'Marqait' in prompt and logo_style is None:
                         company_name = 'Marqait'
                         logo_style = 'Emblem'  # Default based on user selection
             
-            # Create SVG-specific context for Claude refinement
-            logo_context = f"SVG vector logo, Logo style: {logo_style}, Company: {company_name}, Scalable vector graphics, Clean lines, Professional brand identity"
+            # Create comprehensive SVG-specific context for Claude refinement
+            logo_context = f"SVG vector logo, Logo style: {logo_style}, Company: {company_name}, Industry: {industry}, Brand tone: {brand_tone}, Color: {preferred_color}, Scalable vector graphics, Clean lines, Professional brand identity"
             
-            # Refine the prompt using Claude specifically for SVG logo design
+            # Refine the prompt using Claude specifically for SVG logo design with all parameters
             print(f"Original SVG logo prompt: {prompt}")
-            refined_prompt = self.claude_service.refine_logo_prompt(prompt, logo_context, logo_style, format="SVG")
+            refined_prompt = self.claude_service.refine_logo_prompt(
+                prompt, logo_context, logo_style, format="SVG",
+                company_name=company_name, industry=industry,
+                preferred_color=preferred_color, brand_tone=brand_tone
+            )
             print(f"Claude-refined SVG logo prompt: {refined_prompt}")
             
             # Ensure FAL_KEY is set in environment
@@ -240,13 +270,25 @@ class SVGLogoGeneratorTool(BaseTool):
                 with open(png_local_path, 'wb') as f:
                     f.write(image_response.content)
                 
-                # Create a basic SVG version (this would ideally be a proper SVG conversion)
-                # For now, we'll create a placeholder SVG structure that embeds the PNG
+                # Create a professional SVG version with transparent background
                 svg_content = f'''<?xml version="1.0" encoding="UTF-8"?>
-<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" style="background: transparent;">
   <!-- Professional logo for {company_name} -->
   <!-- Style: {logo_style} -->
-  <image href="data:image/png;base64,{self._encode_image_to_base64(image_response.content)}" width="1024" height="1024"/>
+  <!-- Transparent background SVG with embedded PNG data -->
+  <defs>
+    <style>
+      .logo-container {{
+        background: transparent;
+        fill: transparent;
+      }}
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="none" fill-opacity="0"/>
+  <image href="data:image/png;base64,{self._encode_image_to_base64(image_response.content)}" 
+         width="1024" height="1024" 
+         preserveAspectRatio="xMidYMid meet"
+         style="background: transparent;"/>
 </svg>'''
                 
                 with open(svg_local_path, 'w', encoding='utf-8') as f:
@@ -315,7 +357,7 @@ class QwenLogoGeneratorTool(BaseTool):
         self.claude_service = ClaudeRefinementService()
         self.show_grid_lines = show_grid_lines
 
-    def _run(self, prompt: str, logo_style: str = None, company_name: str = None) -> str:
+    def _run(self, prompt: str, logo_style: str = None, company_name: str = None, industry: str = "", preferred_color: str = "", brand_tone: str = "") -> str:
         try:
             # Handle case where CrewAI passes everything as a JSON string in prompt
             import json
@@ -327,18 +369,25 @@ class QwenLogoGeneratorTool(BaseTool):
                         prompt = data.get('prompt', prompt)
                         logo_style = data.get('logo_style', logo_style)
                         company_name = data.get('company_name', company_name)
+                        industry = data.get('industry', industry)
+                        preferred_color = data.get('preferred_color', preferred_color)
+                        brand_tone = data.get('brand_tone', brand_tone)
                 except (json.JSONDecodeError, TypeError):
                     # If not JSON, try to extract from prompt string
                     if 'Marqait' in prompt and logo_style is None:
                         company_name = 'Marqait'
                         logo_style = 'Emblem'  # Default based on user selection
             
-            # Create logo-specific context for Claude refinement
-            logo_context = f"Qwen model logo generation, Logo style: {logo_style}, Company: {company_name}, Professional brand identity with transparent background"
+            # Create comprehensive logo-specific context for Claude refinement with Qwen optimization
+            logo_context = f"Qwen model logo generation, Logo style: {logo_style}, Company: {company_name}, Industry: {industry}, Brand tone: {brand_tone}, Color: {preferred_color}, Professional brand identity with transparent background"
             
-            # Refine the prompt using Claude specifically for logo design with Qwen
+            # Refine the prompt using Claude specifically for logo design with Qwen and all parameters
             print(f"Original Qwen logo prompt: {prompt}")
-            refined_prompt = self.claude_service.refine_logo_prompt(prompt, logo_context, logo_style)
+            refined_prompt = self.claude_service.refine_logo_prompt(
+                prompt, logo_context, logo_style, format="PNG",
+                company_name=company_name, industry=industry,
+                preferred_color=preferred_color, brand_tone=brand_tone
+            )
             print(f"Claude-refined Qwen logo prompt: {refined_prompt}")
             
             # Ensure FAL_KEY is set in environment

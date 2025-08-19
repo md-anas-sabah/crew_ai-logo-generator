@@ -231,11 +231,16 @@ This system creates world-class professional logos that rival the work of top br
 ✅ **Streamlined Generation**: Single logo output without concept selection complexity  
 ✅ **Global Market Ready**: English text requirement ensures universal accessibility  
 ✅ **Mathematical Perfection**: Golden ratio & optical corrections implemented  
-✅ **JSON Integration**: Clean API-ready output for seamless application integration  
+✅ **JSON Integration**: Clean API-ready output with both PNG and SVG URLs  
 ✅ **Text Excellence**: Perfect English company names with strategic typography  
 ✅ **Real Logo Design**: Business-ready logos, not illustrations or artwork  
 ✅ **Transparent Background**: Clean, isolated logos without grids or background elements  
 ✅ **Dual AI Power**: Leveraging multiple AI models for optimal logo generation  
+✅ **Dynamic Style Adaptation**: Prompts automatically adapt to logo style requirements  
+✅ **Industry Intelligence**: Sector-specific design constraints and psychological optimization  
+✅ **Advanced Color Psychology**: Hex code specifications with cultural sensitivity  
+✅ **Professional Typography**: Font recommendations with psychological rationale  
+✅ **Negative Prompt Engineering**: Explicit forbidden elements for better adherence  
 
 #### 🚀 WORLD-BEATING RESULTS:
 
@@ -254,17 +259,19 @@ Your logo generator now creates:
 
 ### JSON Output Format
 
-The system now returns a clean JSON response with only two fields:
+The system now returns a clean JSON response with three fields:
 
 ```json
 {
   "image_url": "https://v3.fal.media/files/lion/SCJAgLL8Bfb59FlLaZkjS_image.png",
+  "svg_url": "./output/logo_company_style_timestamp/logo_company_style_timestamp.svg",
   "reason": "Professional analysis explaining why this logo design is strategically perfect for the company, including brand psychology insights, competitive differentiation, and market positioning advantages..."
 }
 ```
 
 **Fields:**
-- `image_url`: Direct URL to the generated PNG logo (1024x1024px)
+- `image_url`: Direct URL to the generated PNG logo (1024x1024px) with transparent background
+- `svg_url`: Local path/URL to the generated SVG logo with transparent background (scalable vector format)
 - `reason`: Concise brand analysis explaining logo effectiveness (typically 200-500 characters)
 
 ### File Structure
@@ -277,4 +284,4 @@ templates/
 └── logo_preview.html
 ```
 
-**Note:** Files are saved locally for backup, but only the PNG URL is returned in the JSON response.
+**Note:** Both PNG and SVG files are saved locally for backup. The PNG URL is direct from FAL.ai, while SVG URL points to the local transparent background file.
