@@ -20,6 +20,11 @@ class LogoGeneratorArgs(BaseModel):
     logo_style: str = Field(default=None, description="Logo style: WordMark, LetterMark, Pictorial, Abstract, Combination, Emblem")
     company_name: str = Field(default=None, description="Company name for the logo")
     
+class QwenLogoGeneratorArgs(BaseModel):
+    prompt: str = Field(description="The prompt for Qwen logo generation")
+    logo_style: str = Field(default=None, description="Logo style: WordMark, LetterMark, Pictorial, Abstract, Combination, Emblem")
+    company_name: str = Field(default=None, description="Company name for the logo")
+    
 class SVGLogoGeneratorArgs(BaseModel):
     prompt: str = Field(description="The prompt for SVG logo generation")
     logo_style: str = Field(default=None, description="Logo style: WordMark, LetterMark, Pictorial, Abstract, Combination, Emblem")
@@ -30,15 +35,17 @@ class ImageGeneratorArgs(BaseModel):
 
 class LogoGeneratorTool(BaseTool):
     name: str = "generate_logo"
-    description: str = "Generate a professional logo using Ideogram V2A. Use with: prompt (description of the logo design), logo_style (WordMark/LetterMark/Pictorial/Abstract/Combination/Emblem), company_name (company name)."
+    description: str = "Generate a professional logo using Flux Pro. Use with: prompt (description of the logo design), logo_style (WordMark/LetterMark/Pictorial/Abstract/Combination/Emblem), company_name (company name)."
     args_schema: Type[BaseModel] = LogoGeneratorArgs
     output_folder: str = None
     claude_service: ClaudeRefinementService = None
+    show_grid_lines: bool = False
 
-    def __init__(self, output_folder=None):
+    def __init__(self, output_folder=None, show_grid_lines=False):
         super().__init__()
         self.output_folder = output_folder
         self.claude_service = ClaudeRefinementService()
+        self.show_grid_lines = show_grid_lines
 
     def _run(self, prompt: str, logo_style: str = None, company_name: str = None) -> str:
         try:
@@ -69,17 +76,18 @@ class LogoGeneratorTool(BaseTool):
             # Ensure FAL_KEY is set in environment
             os.environ['FAL_KEY'] = config('FAL_KEY')
             
-            # Submit request to Ideogram V2A with WORLD-CLASS logo optimization
+            # Submit request to Flux Pro with WORLD-CLASS logo optimization and transparent background
             result = fal.run(
-                "fal-ai/ideogram/v2a",
+                "fal-ai/flux-pro",
                 arguments={
-                    "prompt": refined_prompt,
-                    "aspect_ratio": "1:1",  # Perfect square for maximum versatility
-                    "style": "design",  # Professional design mode for corporate quality
-                    "resolution": "1024x1024",  # High-definition for all applications
-                    "model": "ideogram-v2-accurate",  # Maximum precision model
-                    "safety_tolerance": 5,  # Allow creative freedom for professional logos
-                    "quality": "premium"  # Highest quality rendering
+                    "prompt": f"{refined_prompt}, TRANSPARENT BACKGROUND, completely isolated logo, {'with construction grid lines, design guidelines visible' if self.show_grid_lines else 'NO GRID LINES, NO BACKGROUND ELEMENTS, NO DECORATIVE BACKGROUNDS, NO SCENES, NO ENVIRONMENTS, clean standalone logo mark only, isolated logo on transparent background, professional logo design, no construction guides, logo only no background'}, white background for transparency, clean logo only",
+                    "image_size": "square_hd",  # Perfect square for maximum versatility
+                    "num_inference_steps": 28,  # High quality steps
+                    "guidance_scale": 3.5,  # Optimal balance for logo design
+                    "num_images": 1,  # Single high-quality logo
+                    "enable_safety_checker": False,  # Allow creative freedom for professional logos
+                    "output_format": "png",  # PNG format for transparency support
+                    "seed": None  # Random seed for variety
                 }
             )
             
@@ -133,6 +141,7 @@ class LogoGeneratorTool(BaseTool):
                 })
                 
         except Exception as e:
+            print(f"Detailed error in LogoGeneratorTool: {str(e)}")
             return json.dumps({
                 "image_url": "Error",
                 "local_path": "Error",
@@ -140,7 +149,8 @@ class LogoGeneratorTool(BaseTool):
                 "company_name": company_name,
                 "logo_style": logo_style,
                 "prompt": prompt,
-                "error": f"Error generating logo: {str(e)}"
+                "model": "flux-pro",
+                "error": f"Error generating Flux Pro logo: {str(e)}"
             })
 
 class SVGLogoGeneratorTool(BaseTool):
@@ -149,11 +159,13 @@ class SVGLogoGeneratorTool(BaseTool):
     args_schema: Type[BaseModel] = SVGLogoGeneratorArgs
     output_folder: str = None
     claude_service: ClaudeRefinementService = None
+    show_grid_lines: bool = False
 
-    def __init__(self, output_folder=None):
+    def __init__(self, output_folder=None, show_grid_lines=False):
         super().__init__()
         self.output_folder = output_folder
         self.claude_service = ClaudeRefinementService()
+        self.show_grid_lines = show_grid_lines
 
     def _run(self, prompt: str, logo_style: str = None, company_name: str = None) -> str:
         try:
@@ -184,17 +196,18 @@ class SVGLogoGeneratorTool(BaseTool):
             # Ensure FAL_KEY is set in environment
             os.environ['FAL_KEY'] = config('FAL_KEY')
             
-            # Submit request to Ideogram V2A with VECTOR-OPTIMIZED settings for scalability
+            # Submit request to Flux Pro with VECTOR-OPTIMIZED settings for scalability and transparent background
             result = fal.run(
-                "fal-ai/ideogram/v2a",
+                "fal-ai/flux-pro",
                 arguments={
-                    "prompt": refined_prompt,
-                    "aspect_ratio": "1:1",  # Perfect square for vector scalability
-                    "style": "design",  # Professional vector-friendly design mode
-                    "resolution": "1024x1024",  # High-resolution base for vector conversion
-                    "model": "ideogram-v2-accurate",  # Maximum precision for clean vectors
-                    "safety_tolerance": 5,  # Creative freedom for professional logos
-                    "quality": "premium"  # Highest quality for vector optimization
+                    "prompt": f"{refined_prompt}, TRANSPARENT BACKGROUND, completely isolated logo, {'with construction grid lines, design guidelines visible' if self.show_grid_lines else 'NO GRID LINES, NO BACKGROUND ELEMENTS, NO DECORATIVE BACKGROUNDS, NO SCENES, NO ENVIRONMENTS, clean standalone logo mark only, isolated logo on transparent background, professional logo design, no construction guides, logo only no background'}, vector-friendly design, white background for transparency, clean logo only",
+                    "image_size": "square_hd",  # Perfect square for vector scalability
+                    "num_inference_steps": 28,  # High quality steps
+                    "guidance_scale": 3.5,  # Optimal balance for logo design
+                    "num_images": 1,  # Single high-quality logo
+                    "enable_safety_checker": False,  # Creative freedom for professional logos
+                    "output_format": "png",  # PNG format for transparency support
+                    "seed": None  # Random seed for variety
                 }
             )
             
@@ -269,6 +282,7 @@ class SVGLogoGeneratorTool(BaseTool):
                 })
                 
         except Exception as e:
+            print(f"Detailed error in SVGLogoGeneratorTool: {str(e)}")
             return json.dumps({
                 "image_url": "Error",
                 "png_local_path": "Error",
@@ -278,6 +292,7 @@ class SVGLogoGeneratorTool(BaseTool):
                 "company_name": company_name,
                 "logo_style": logo_style,
                 "prompt": prompt,
+                "model": "flux-pro-svg",
                 "error": f"Error generating SVG logo: {str(e)}"
             })
     
@@ -286,9 +301,126 @@ class SVGLogoGeneratorTool(BaseTool):
         import base64
         return base64.b64encode(image_content).decode('utf-8')
 
+class QwenLogoGeneratorTool(BaseTool):
+    name: str = "generate_qwen_logo"
+    description: str = "Generate a professional logo using Qwen model with transparent background and clean design."
+    args_schema: Type[BaseModel] = QwenLogoGeneratorArgs
+    output_folder: str = None
+    claude_service: ClaudeRefinementService = None
+    show_grid_lines: bool = False
+
+    def __init__(self, output_folder=None, show_grid_lines=False):
+        super().__init__()
+        self.output_folder = output_folder
+        self.claude_service = ClaudeRefinementService()
+        self.show_grid_lines = show_grid_lines
+
+    def _run(self, prompt: str, logo_style: str = None, company_name: str = None) -> str:
+        try:
+            # Handle case where CrewAI passes everything as a JSON string in prompt
+            import json
+            if logo_style is None or company_name is None:
+                try:
+                    # Try to parse prompt as JSON
+                    data = json.loads(prompt)
+                    if isinstance(data, dict):
+                        prompt = data.get('prompt', prompt)
+                        logo_style = data.get('logo_style', logo_style)
+                        company_name = data.get('company_name', company_name)
+                except (json.JSONDecodeError, TypeError):
+                    # If not JSON, try to extract from prompt string
+                    if 'Marqait' in prompt and logo_style is None:
+                        company_name = 'Marqait'
+                        logo_style = 'Emblem'  # Default based on user selection
+            
+            # Create logo-specific context for Claude refinement
+            logo_context = f"Qwen model logo generation, Logo style: {logo_style}, Company: {company_name}, Professional brand identity with transparent background"
+            
+            # Refine the prompt using Claude specifically for logo design with Qwen
+            print(f"Original Qwen logo prompt: {prompt}")
+            refined_prompt = self.claude_service.refine_logo_prompt(prompt, logo_context, logo_style)
+            print(f"Claude-refined Qwen logo prompt: {refined_prompt}")
+            
+            # Ensure FAL_KEY is set in environment
+            os.environ['FAL_KEY'] = config('FAL_KEY')
+            
+            # Submit request to Qwen Image model with transparent background optimization
+            result = fal.run(
+                "fal-ai/qwen-image",
+                arguments={
+                    "prompt": f"{refined_prompt}, TRANSPARENT BACKGROUND, completely isolated logo, {'with construction grid lines, design guidelines visible' if self.show_grid_lines else 'NO GRID LINES, NO BACKGROUND ELEMENTS, NO DECORATIVE BACKGROUNDS, NO SCENES, NO ENVIRONMENTS, clean standalone logo mark only, isolated logo on transparent background, professional logo design, no construction guides, logo only no background'}, white background for transparency, clean logo only",
+                    "image_size": "square_hd",  # High-definition square format
+                    "num_inference_steps": 50,  # High quality rendering
+                    "guidance_scale": 7.5,  # Balanced creativity and adherence
+                }
+            )
+            
+            image_url = result['images'][0]['url']
+            
+            # Download and save the logo locally
+            image_response = requests.get(image_url)
+            if image_response.status_code == 200:
+                # Create unique filename for the logo
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                unique_id = str(uuid.uuid4())[:8]
+                safe_company_name = re.sub(r'[^\w\s-]', '', company_name.lower().replace(' ', '_'))[:20]
+                filename = f"qwen_logo_{safe_company_name}_{logo_style.lower()}_{timestamp}_{unique_id}.png"
+                
+                # Use the specific output folder if provided
+                if self.output_folder:
+                    os.makedirs(self.output_folder, exist_ok=True)
+                    local_path = os.path.join(self.output_folder, filename)
+                else:
+                    # Fallback to default logos folder
+                    current_dir = os.getcwd()
+                    logos_dir = os.path.join(current_dir, "generated_logos")
+                    os.makedirs(logos_dir, exist_ok=True)
+                    local_path = os.path.join(logos_dir, filename)
+                
+                with open(local_path, 'wb') as f:
+                    f.write(image_response.content)
+                
+                return json.dumps({
+                    "image_url": image_url,
+                    "local_path": local_path,
+                    "filename": filename,
+                    "company_name": company_name,
+                    "logo_style": logo_style,
+                    "original_prompt": prompt,
+                    "refined_prompt": refined_prompt,
+                    "format": "PNG",
+                    "resolution": "1024x1024",
+                    "model": "flux-pro",
+                    "logo_type": "professional_transparent_logo"
+                })
+            else:
+                return json.dumps({
+                    "image_url": image_url,
+                    "local_path": "Failed to download",
+                    "filename": "Failed to download",
+                    "company_name": company_name,
+                    "logo_style": logo_style,
+                    "prompt": prompt,
+                    "model": "flux-pro",
+                    "error": f"Failed to download logo: {image_response.status_code}"
+                })
+                
+        except Exception as e:
+            print(f"Detailed error in QwenLogoGeneratorTool: {str(e)}")
+            return json.dumps({
+                "image_url": "Error",
+                "local_path": "Error",
+                "filename": "Error",
+                "company_name": company_name,
+                "logo_style": logo_style,
+                "prompt": prompt,
+                "model": "qwen-image",
+                "error": f"Error generating Qwen logo: {str(e)}"
+            })
+
 class ImageGeneratorTool(BaseTool):
     name: str = "generate_image"
-    description: str = "Generate an image using Ideogram V2A based on the provided prompt."
+    description: str = "Generate an image using Flux Pro based on the provided prompt."
     args_schema: Type[BaseModel] = ImageGeneratorArgs
     output_folder: str = None
     claude_service: ClaudeRefinementService = None
@@ -308,13 +440,17 @@ class ImageGeneratorTool(BaseTool):
             # Ensure FAL_KEY is set in environment
             os.environ['FAL_KEY'] = config('FAL_KEY')
             
-            # Submit request to Ideogram V2A with refined prompt
+            # Submit request to Flux Pro with refined prompt
             result = fal.run(
-                "fal-ai/ideogram/v2a",
+                "fal-ai/flux-pro",
                 arguments={
                     "prompt": refined_prompt,
-                    "aspect_ratio": "1:1",
-                    "style": "auto"
+                    "image_size": "square_hd",
+                    "num_inference_steps": 28,
+                    "guidance_scale": 3.5,
+                    "num_images": 1,
+                    "enable_safety_checker": False,
+                    "output_format": "png"
                 }
             )
             
@@ -374,7 +510,7 @@ class CarouselImageGeneratorArgs(BaseModel):
     
 class CarouselImageGeneratorTool(BaseTool):
     name: str = "generate_carousel_images"
-    description: str = "Generate multiple images for carousel posts using Ideogram V2A based on a list of prompts."
+    description: str = "Generate multiple images for carousel posts using Flux Pro based on a list of prompts."
     args_schema: Type[BaseModel] = CarouselImageGeneratorArgs
     output_folder: str = None
     claude_service: ClaudeRefinementService = None
@@ -399,11 +535,15 @@ class CarouselImageGeneratorTool(BaseTool):
                     os.environ['FAL_KEY'] = config('FAL_KEY')
                     
                     result = fal.run(
-                        "fal-ai/ideogram/v2a",
+                        "fal-ai/flux-pro",
                         arguments={
                             "prompt": refined_prompt,
-                            "aspect_ratio": "1:1",
-                            "style": "auto"
+                            "image_size": "square_hd",
+                            "num_inference_steps": 28,
+                            "guidance_scale": 3.5,
+                            "num_images": 1,
+                            "enable_safety_checker": False,
+                            "output_format": "png"
                         }
                     )
                     
@@ -480,7 +620,7 @@ class StoryImageGeneratorArgs(BaseModel):
 
 class StoryImageGeneratorTool(BaseTool):
     name: str = "generate_story_image"
-    description: str = "Generate a single vertical story image (9:16 format) using Ideogram V2A based on the provided prompt."
+    description: str = "Generate a single vertical story image (9:16 format) using Flux Pro based on the provided prompt."
     args_schema: Type[BaseModel] = StoryImageGeneratorArgs
     output_folder: str = None
     claude_service: ClaudeRefinementService = None
@@ -501,11 +641,15 @@ class StoryImageGeneratorTool(BaseTool):
             os.environ['FAL_KEY'] = config('FAL_KEY')
             
             result = fal.run(
-                "fal-ai/ideogram/v2a",
+                "fal-ai/flux-pro",
                 arguments={
                     "prompt": refined_prompt,
-                    "aspect_ratio": "9:16",
-                    "style": "auto"
+                    "image_size": "portrait_16_9",
+                    "num_inference_steps": 28,
+                    "guidance_scale": 3.5,
+                    "num_images": 1,
+                    "enable_safety_checker": False,
+                    "output_format": "png"
                 }
             )
             
@@ -568,7 +712,7 @@ class StorySeriesGeneratorArgs(BaseModel):
     
 class StorySeriesGeneratorTool(BaseTool):
     name: str = "generate_story_series"
-    description: str = "Generate multiple vertical story images (9:16 format) for story series using Ideogram V2A based on a list of prompts."
+    description: str = "Generate multiple vertical story images (9:16 format) for story series using Flux Pro based on a list of prompts."
     args_schema: Type[BaseModel] = StorySeriesGeneratorArgs
     output_folder: str = None
     claude_service: ClaudeRefinementService = None
@@ -593,11 +737,15 @@ class StorySeriesGeneratorTool(BaseTool):
                     os.environ['FAL_KEY'] = config('FAL_KEY')
                     
                     result = fal.run(
-                        "fal-ai/ideogram/v2a",
+                        "fal-ai/flux-pro",
                         arguments={
                             "prompt": refined_prompt,
-                            "aspect_ratio": "9:16",
-                            "style": "auto"
+                            "image_size": "portrait_16_9",
+                            "num_inference_steps": 28,
+                            "guidance_scale": 3.5,
+                            "num_images": 1,
+                            "enable_safety_checker": False,
+                            "output_format": "png"
                         }
                     )
                     
@@ -776,7 +924,7 @@ class LogoDesignAgents:
             llm=self.OpenAIGPT4,
         )
 
-    def logo_designer_agent(self, output_folder=None):
+    def logo_designer_agent(self, output_folder=None, show_grid_lines=False):
         return Agent(
             role="🚀 LEGENDARY Logo Designer & Visual Identity Architect",
             backstory=dedent("""You are Paul Rand, Saul Bass, and Milton Glaser reincarnated as an AI designer. 
@@ -824,7 +972,7 @@ class LogoDesignAgents:
                        🚀 Global market readiness and cross-cultural effectiveness
                        ⚡ Trademark viability and competitive supremacy
                        🎯 50-year longevity and timeless design excellence"""),
-            tools=[LogoGeneratorTool(output_folder), SVGLogoGeneratorTool(output_folder)],
+            tools=[LogoGeneratorTool(output_folder, show_grid_lines), SVGLogoGeneratorTool(output_folder, show_grid_lines), QwenLogoGeneratorTool(output_folder, show_grid_lines)],
             allow_delegation=False,
             verbose=True,
             llm=self.creative_llm,

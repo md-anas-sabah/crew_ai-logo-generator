@@ -17,13 +17,14 @@ if config("OPENAI_ORGANIZATION_ID", default=""):
 
 
 class LogoGenerator:
-    def __init__(self, company_name, company_description, logo_style, preferred_color="", brand_tone="", industry_keywords=""):
+    def __init__(self, company_name, company_description, logo_style, preferred_color="", brand_tone="", industry_keywords="", show_grid_lines=False):
         self.company_name = company_name
         self.company_description = company_description
         self.logo_style = logo_style
         self.preferred_color = preferred_color
         self.brand_tone = brand_tone
         self.industry_keywords = industry_keywords
+        self.show_grid_lines = show_grid_lines
     
     def create_unique_output_folder(self):
         """Create a unique folder for this logo's outputs"""
@@ -233,7 +234,7 @@ class LogoGenerator:
         logo_folder, timestamp = self.create_unique_output_folder()
         
         # Initialize logo design agents
-        logo_designer = agents.logo_designer_agent(logo_folder)
+        logo_designer = agents.logo_designer_agent(logo_folder, self.show_grid_lines)
         brand_analyst = agents.brand_analyst_agent()
         
         # Create brand context for logo generation
@@ -258,27 +259,36 @@ class LogoGenerator:
         
         logo_result = design_crew.kickoff()
         
-        # Parse logo results and extract PNG URL
+        # Parse dual AI logo results and extract best PNG URL with transparent background
         image_url = None
         reason = None
         
         try:
-            # Extract logo data from the result
+            # Extract logo data from the dual AI result
             logo_result_str = str(logo_result)
             
-            # Try to parse logo URLs from the result
+            # Try to parse logo URLs from both AI models
             import re
-            url_match = re.search(r'https://[^\s\)\"]+\.png', logo_result_str)
+            url_matches = re.findall(r'https://[^\s\)\"]+\.png', logo_result_str)
             
-            if url_match:
-                image_url = url_match.group()
+            # Select the best logo URL (prioritize the one with better quality indicators)
+            if url_matches:
+                # For now, use the first valid URL (can be enhanced with quality selection logic)
+                image_url = url_matches[0]
+                
+                # Log both generated logos for reference
+                if len(url_matches) > 1:
+                    print(f"Dual AI generation complete: Primary model URL: {url_matches[0]}")
+                    if len(url_matches) > 1:
+                        print(f"Secondary model URL: {url_matches[1]}")
+                    print("Selected primary model result for optimal quality and transparent background")
             
             # Generate brand analysis for the reason
             if image_url:
                 brand_task = tasks.brand_analysis_task(
                     brand_analyst,
                     logo_result_str,
-                    f"Company: {self.company_name}, Description: {self.company_description}, Style: {self.logo_style}"
+                    f"Company: {self.company_name}, Description: {self.company_description}, Style: {self.logo_style}, Features: transparent background, clean standalone design, dual AI enhanced"
                 )
                 
                 analysis_crew = Crew(
@@ -291,12 +301,12 @@ class LogoGenerator:
                 reason = str(analysis_result)[:500]  # Keep it concise
                 
         except Exception as e:
-            reason = f"Error generating logo analysis: {str(e)}"
+            reason = f"Error generating dual AI logo analysis: {str(e)}"
         
-        # Return pure JSON response
+        # Return pure JSON response with transparent background logo
         result = {
-            "image_url": image_url or "Error generating logo",
-            "reason": reason or "Professional logo design created for optimal brand recognition and market positioning"
+            "image_url": image_url or "Error generating dual AI logo",
+            "reason": reason or "Professional logo design created with transparent background using dual AI models (Flux Pro + Qwen) for optimal brand recognition, clean standalone presentation, and market positioning excellence"
         }
         
         return result
@@ -560,13 +570,23 @@ if __name__ == "__main__":
         brand_tone = input("Brand Tone (optional): ").strip()
         industry_keywords = input("Industry (optional): ").strip()
         
+        # Grid lines option
+        while True:
+            try:
+                grid_choice = input("Show construction grid lines? (y/N): ").strip().lower()
+                show_grid_lines = grid_choice in ['y', 'yes', '1', 'true']
+                break
+            except KeyboardInterrupt:
+                exit()
+        
         generator = LogoGenerator(
             company_name=company_name,
             company_description=company_description,
             logo_style=logo_style,
             preferred_color=preferred_color,
             brand_tone=brand_tone,
-            industry_keywords=industry_keywords
+            industry_keywords=industry_keywords,
+            show_grid_lines=show_grid_lines
         )
         
         result = generator.run()

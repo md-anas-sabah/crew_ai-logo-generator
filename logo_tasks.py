@@ -156,22 +156,33 @@ class LogoDesignTasks:
             - Differentiate from competitors while honoring industry conventions
             - Support long-term brand building and recognition goals
             
-            🚀 PROFESSIONAL LOGO GENERATION PROTOCOL:
+            🚀 DUAL-AI PROFESSIONAL LOGO GENERATION PROTOCOL:
             
             PHASE 1 - STRATEGIC DESIGN ENGINEERING:
             1. Analyze company requirements for mathematical composition opportunities
             2. Engineer professional prompt using Fortune 500 design principles
             3. Integrate golden ratio, color psychology, and cultural symbolism
-            4. Optimize for Ideogram V2A's professional rendering capabilities
+            4. Optimize for dual-AI rendering capabilities (Ideogram V2A + Qwen)
+            5. Ensure transparent background and clean standalone design requirements
             
-            PHASE 2 - SINGLE LOGO CREATION:
-            Execute generate_svg_logo tool ONCE with COMPREHENSIVE parameters:
-               - prompt: "Professional {logo_style} logo design for {company_name} in English text only, real logo not illustration, mathematical precision, golden ratio composition, Fortune 500 quality standards, trademark-ready uniqueness, scalability engineering, competitive differentiation, company name in English only"
+            PHASE 2 - DUAL-MODEL LOGO GENERATION:
+            Execute BOTH logo generation tools to leverage dual-AI enhancement:
+            
+            PRIMARY MODEL - Execute generate_svg_logo tool with COMPREHENSIVE parameters:
+               - prompt: "Professional {logo_style} logo design for {company_name} in English text only, real logo not illustration, mathematical precision, golden ratio composition, Fortune 500 quality standards, trademark-ready uniqueness, scalability engineering, competitive differentiation, transparent background, no grid lines, no background elements, clean standalone logo, company name in English only"
                - logo_style: "{logo_style}"
                - company_name: "{company_name}"
             
-            PHASE 3 - QUALITY VERIFICATION:
-            Verify logo meets professional standards and contains only English company name text
+            SECONDARY MODEL - Execute generate_qwen_logo tool for alternative approach:
+               - prompt: "Professional {logo_style} logo design for {company_name} in English text only, real logo not illustration, mathematical precision, golden ratio composition, Fortune 500 quality standards, trademark-ready uniqueness, scalability engineering, competitive differentiation, transparent background, no grid lines, no background elements, clean standalone logo, company name in English only"
+               - logo_style: "{logo_style}"
+               - company_name: "{company_name}"
+            
+            PHASE 3 - QUALITY VERIFICATION & SELECTION:
+            1. Verify both logos meet professional standards with transparent backgrounds
+            2. Ensure both contain only English company name text
+            3. Select the superior logo based on quality, clarity, and professional appearance
+            4. Return the best result from dual-AI generation
             
             PROFESSIONAL PROMPT STRUCTURE:
             Create logo prompts that include:
@@ -182,7 +193,7 @@ class LogoDesignTasks:
             - Scalability and application requirements
             - Premium quality specifications for business use
             
-            🚨 CRITICAL LOGO TEXT REQUIREMENTS:
+            🚨 CRITICAL LOGO REQUIREMENTS:
             • ONLY include the exact company name "{company_name}" in ENGLISH - NO other text
             • Perfect spelling verification - company name must be 100% accurate
             • Font selection based on company personality and industry psychology
@@ -191,11 +202,25 @@ class LogoDesignTasks:
             • Clean, professional presentation suitable for all applications
             • Company name text MUST be in English language only
             • Design must be an actual LOGO, not an illustration or artwork
+            • TRANSPARENT BACKGROUND - no solid backgrounds, grids, or decorative elements
+            • Remove all grid lines, background textures, and additional visual elements
+            • Logo should be standalone and isolated without any background elements
+            • Generate as single PNG or SVG file with transparent background only
             
-            EXAMPLE TOOL USAGE:
+            EXAMPLE DUAL-AI TOOL USAGE:
+            
+            PRIMARY MODEL:
             Action: generate_svg_logo
             Action Input: {{
-              "prompt": "Professional emblem logo featuring the company name 'Marqait' in English text only, perfect typography, classic badge design with purple color scheme, Fortune 500 quality, mathematical precision composition, brand-appropriate font psychology, real logo not illustration",
+              "prompt": "Professional emblem logo featuring the company name 'Marqait' in English text only, perfect typography, classic badge design with purple color scheme, Fortune 500 quality, mathematical precision composition, brand-appropriate font psychology, transparent background, no grid lines, no background elements, clean standalone logo, real logo not illustration",
+              "logo_style": "Emblem", 
+              "company_name": "Marqait"
+            }}
+            
+            SECONDARY MODEL:
+            Action: generate_qwen_logo
+            Action Input: {{
+              "prompt": "Professional emblem logo featuring the company name 'Marqait' in English text only, perfect typography, classic badge design with purple color scheme, Fortune 500 quality, mathematical precision composition, brand-appropriate font psychology, transparent background, no grid lines, no background elements, clean standalone logo, real logo not illustration",
               "logo_style": "Emblem", 
               "company_name": "Marqait"
             }}
