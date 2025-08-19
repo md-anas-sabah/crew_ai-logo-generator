@@ -39,21 +39,26 @@ class ClaudeRefinementService:
 
             ⚠️ CRITICAL TEXT REQUIREMENTS - ZERO TOLERANCE POLICY:
             - ONLY the exact text "{company_name}" is allowed - NO OTHER TEXT WHATSOEVER
-            - FORBIDDEN: APIC, API, acronyms, abbreviations, initials, codes, placeholders
+            - FORBIDDEN: "LAW", "LEGAL", "ATTORNEY", "FIRM", or any industry descriptors
+            - FORBIDDEN: Any text except "{company_name}" - ZERO EXCEPTIONS
             - FORBIDDEN: descriptions, slogans, taglines, explanatory text, sample text
             - FORBIDDEN: Lorem ipsum, placeholder text, generic text, template text
             - FORBIDDEN: foreign languages, symbols as text, decorative text elements
             - MANDATORY: Perfect spelling "{company_name}" - verify 100% accuracy
             - MANDATORY: English language only for the company name
             - MANDATORY: Real LOGO design, not illustration or artwork
+            - MANDATORY: SINGLE LOGO ONLY - no multiple versions or comparison layouts
             - NO TEXT ADDITIONS: Do not add any text beyond "{company_name}"
 
             🎨 VISUAL REQUIREMENTS:
             - 100% TRANSPARENT BACKGROUND - completely isolated logo mark
+            - SINGLE LOGO ONLY - no multiple versions, no comparison layouts, no templates
+            - NO BACKGROUND ELEMENTS - no solid colors, gradients, or decorative backgrounds
             - Mathematical precision using golden ratio and fibonacci principles
             - Trademark-ready uniqueness and competitive differentiation
             - Scalable from 16px favicon to 100ft billboard perfection
             - Fortune 500 reproduction standards
+            - STANDALONE DESIGN - one clean logo on transparent background
 
             Context: {logo_context}
             Format: {format}
@@ -82,21 +87,22 @@ class ClaudeRefinementService:
 
             ⛔ NEGATIVE PROMPT (EXPLICITLY FORBIDDEN):
             - Any text except "{company_name}" - NO EXCEPTIONS
-            - APIC, API, acronyms, abbreviations, initials, codes
+            - Industry descriptors: "LAW", "LEGAL", "ATTORNEY", "FIRM", "SERVICES" 
             - Placeholder text: Lorem ipsum, sample text, generic text
             - Template text: Company Name, Your Text Here, Example Text
             - Slogans, taglines, descriptions, explanations, marketing copy
-            - Background elements, environments, scenes, contexts
+            - Background elements, environments, scenes, contexts, solid backgrounds
             - Construction grids, guides, rulers, alignment helpers, design templates
-            - Decorative backgrounds, textures, gradients, patterns
+            - Decorative backgrounds, textures, gradients, patterns, colored backgrounds
             - Foreign language text, symbols as text, decorative typography
             - Illustrations or artwork (must be actual logo)
             - Shadows, lighting effects, 3D elements, special effects
-            - Multiple logo variations in single image
+            - Multiple logo variations in single image, comparison layouts, template formats
             - Watermarks, copyright notices, credits, attribution text
+            - Split screen designs, before/after layouts, multiple logo versions
             - ANY TEXT OTHER THAN "{company_name}" IS STRICTLY FORBIDDEN
 
-            FINAL CRITICAL INSTRUCTION: The logo must contain ONLY the text "{company_name}" and NOTHING else. Do not add APIC, API, acronyms, or any other text. This is a ZERO TOLERANCE requirement.
+            FINAL CRITICAL INSTRUCTION: Generate ONE SINGLE LOGO with ONLY the text "{company_name}" on a completely transparent background. No multiple versions, no comparison layouts, no extra text. This is a ZERO TOLERANCE requirement.
             
             Provide the refined prompt as a single, comprehensive design specification ready for professional {logo_style} logo generation."""
 
@@ -116,7 +122,7 @@ class ClaudeRefinementService:
         except Exception as e:
             print(f"Claude refinement error: {str(e)}")
             # Fallback to enhanced original prompt with strict text requirements
-            return f"Professional {logo_style} logo design with ONLY the text '{company_name}' in English - NO APIC, NO API, NO acronyms, NO abbreviations, NO other text whatsoever, {original_prompt}, Fortune 500 quality, mathematical precision, real logo not illustration, 100% TRANSPARENT BACKGROUND, NO GRIDS, NO DECORATIVE BACKGROUNDS, NO ENVIRONMENTS, NO SCENES, completely isolated logo mark only, clean standalone logo like Apple or Nike logos, company name '{company_name}' only"
+            return f"Professional {logo_style} logo design with ONLY the text '{company_name}' in English - NO other text whatsoever, {original_prompt}, Fortune 500 quality, mathematical precision, real logo not illustration, 100% TRANSPARENT BACKGROUND, NO GRIDS, NO DECORATIVE BACKGROUNDS, NO ENVIRONMENTS, NO SCENES, completely isolated logo mark only, clean standalone logo like Apple or Nike logos, company name '{company_name}' only"
     
     def refine_image_prompt(self, original_prompt, context=""):
         """
